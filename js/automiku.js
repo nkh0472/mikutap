@@ -1,20 +1,22 @@
-// 延迟音符的随机数范围
-randomTime = {
-    max: 200,
-    min: 100
-}
-
 $(function () {
+    // 延迟音符的随机数范围
+    randomTime = {
+        max: 200,
+        min: 100
+    }
+    MIKU_CONFIG.AUTO_PLAY = false
     console.log(MIKU)
+    MIKU.customUpdate = function () {
+        // mikumiku()
+    }
 
     function mikumiku() {
         n = Math.floor(Math.random() * 32)
-        console.log(n)
+        // console.log(n)
         // 模拟按下操作
         MIKU.k.r(n)
         // 模拟抬起操作, 只有完整的按下和抬起操作进行之后, 才能继续发音
         MIKU.k.r(-1)
-        nextTime()
     }
 
     time = 1000
@@ -32,14 +34,18 @@ $(function () {
     }
 
     // 异步调用开始
-    const startMiku = async () => {
+    const initMiku = async () => {
         console.log("始まりましょう。")
         while (1) {
-            console.log(time)
             await wait(time)
-            mikumiku()
+            nextTime()
+            if (MIKU_CONFIG.AUTO_PLAY && MIKU_CONFIG.BACK_PLAY) {
+                mikumiku()
+            }
+            MIKU_CONFIG.BACK_PLAY = false;
         }
     }
+
     $("#bt_start a").each(function () {
         // https://stackoverflow.com/questions/7752512/jquery-get-reference-to-click-event-and-trigger-it-later/14150317
         // get all our click events and store them
@@ -61,21 +67,16 @@ $(function () {
             for (i in y) {
                 y[i](a)
             }
-            startMiku()
+            initMiku()
             return true;
             // if they click cancel, return false
         })
     })
-    // $("#bt_start a").click(()=>{
-    // globalStartFun()
-    // startMiku()
-    // })
-    // Object.defineProperty(aidn, '___waContext',
-    //     {
-    // get: () => context,
-    // set: (v) => {
-    // context = v
-    // start()
-    // }
-    // })
+
+    $(window).on("keydown", (k) => {
+        if (k.keyCode === 32) {
+            MIKU.bt_autoplay()
+            console.log("auto play stop")
+        }
+    })
 });
